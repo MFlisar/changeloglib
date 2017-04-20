@@ -47,7 +47,9 @@ public class ChangeLogRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
     private int mRowLayoutId = Constants.mRowLayoutId;
     private int mRowHeaderLayoutId = Constants.mRowHeaderLayoutId;
     private int mStringVersionHeader = Constants.mStringVersionHeader;
+    private int mMinimumVersionToShow = -1;
 
+    private List<ChangeLogRow> allItems;
     private List<ChangeLogRow> items;
 
     // -------------------------------------------------------------
@@ -58,16 +60,31 @@ public class ChangeLogRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
         this.mContext = mContext;
         if (items == null)
             items = new ArrayList<>();
-        this.items = items;
+        this.allItems = items;
+        this.items = new ArrayList<>();
+        this.items.addAll(filterItems(items));
     }
 
     public void add(LinkedList<ChangeLogRow> rows) {
         int originalPosition= items.size();
-        items.addAll(rows);
-        notifyItemRangeInserted(originalPosition,originalPosition+rows.size());
+        allItems.addAll(rows);
+        List<ChangeLogRow> rowsToAdd = filterItems(rows);
+        items.addAll(rowsToAdd);
+        notifyItemRangeInserted(originalPosition, originalPosition + rowsToAdd.size());
     }
 
+    private List<ChangeLogRow> filterItems(List<ChangeLogRow> rows) {
+        if (mMinimumVersionToShow < 0)
+            return rows;
 
+        List<ChangeLogRow> rowsToAdd = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            if (rows.get(i).getVersionCode() >= mMinimumVersionToShow) {
+                rowsToAdd.add(rows.get(i));
+            }
+        }
+        return rowsToAdd;
+    }
     // -------------------------------------------------------------
     // ViewHolder
     // -------------------------------------------------------------
@@ -200,4 +217,15 @@ public class ChangeLogRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
         this.mRowHeaderLayoutId = mRowHeaderLayoutId;
     }
 
+    /*
+    * set the minimum version to show (inclusive the passed version)
+    *
+    * @param version the minimum version to show in this adapter
+     */
+    public void setMinimumVersionToShow(int version) {
+        this.mMinimumVersionToShow = version;
+        if (this.allItems != null && this.allItems.size() > 0) {
+            this.items = filterItems(this.allItems);
+        }
+    }
 }

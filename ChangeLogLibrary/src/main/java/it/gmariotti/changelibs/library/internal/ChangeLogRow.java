@@ -18,6 +18,7 @@ package it.gmariotti.changelibs.library.internal;
 import android.content.Context;
 
 import it.gmariotti.changelibs.R;
+import it.gmariotti.changelibs.library.Formatter;
 
 /**
  * ChangeLogRow model
@@ -144,18 +145,7 @@ public class ChangeLogRow {
         if (context == null)
             return getChangeText();
 
-        String prefix = "";
-        switch (type) {
-            case BUGFIX:
-                prefix = context.getResources().getString(R.string.changelog_row_prefix_bug);
-                prefix = prefix.replaceAll("\\[", "<").replaceAll("\\]", ">");
-                break;
-            case IMPROVEMENT:
-                prefix = context.getResources().getString(R.string.changelog_row_prefix_improvement);
-                prefix = prefix.replaceAll("\\[", "<").replaceAll("\\]", ">");
-                break;
-        }
-        return prefix + " " + changeText;
+        return Formatter.getFormatter().formatChangelogRow(context, type, changeText);
     }
 
     public void setChangeText(String changeText) {
